@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reserva tu turno · Dra. Naibis</title>
+<style>
+  :root{
+    --teal:#0e7c86; --teal-dark:#0a5d65; --teal-light:#e6f5f6;
+    --mint:#d9f2ec; --ink:#123c40; --soft:#5b7a7d;
+    --bg:#f4fafa; --card:#ffffff; --wa:#25d366; --ok:#128c4b; --bad:#c0392b;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  body{font-family:'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif; background:var(--bg); color:var(--ink); padding-bottom:40px;}
+  .h-paciente{background:linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%); color:#fff; padding:30px 20px 46px; text-align:center; border-radius:0 0 28px 28px;}
+  .logo{width:74px;height:74px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:38px;margin:0 auto 12px;box-shadow:0 6px 18px rgba(0,0,0,.18);}
+  .h-paciente h1{font-size:26px; letter-spacing:.3px;}
+  .h-paciente p{opacity:.92; font-size:15px; margin-top:5px;}
+  .h-panel{background:linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%); color:#fff; padding:24px 20px; border-radius:0 0 24px 24px;}
+  .h-panel h1{font-size:21px;}
+  .h-panel p{opacity:.9; font-size:14px; margin-top:3px;}
+  .h-panel a{color:#fff; font-size:13.5px; opacity:.85;}
+  .wrap{max-width:560px; margin:-26px auto 0; padding:0 14px;}
+  .wrap-panel{max-width:560px; margin:18px auto 0; padding:0 14px;}
+  .card{background:var(--card); border-radius:20px; padding:20px 18px; box-shadow:0 8px 24px rgba(10,93,101,.08); margin-bottom:16px;}
+  .card h2{font-size:17px; color:var(--teal-dark); margin-bottom:14px; display:flex; align-items:center; gap:8px;}
+  .step-num{background:var(--teal); color:#fff; width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:13px; flex:none;}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .opt{border:2px solid #e2eeee; border-radius:14px; padding:13px 12px; cursor:pointer; background:#fff; font-size:15px;}
+  .opt small{display:block; color:var(--soft); font-size:12.5px; margin-top:2px;}
+  .opt.sel{border-color:var(--teal); background:var(--teal-light); box-shadow:0 0 0 2px var(--teal) inset;}
+  .days{display:flex; gap:8px; overflow-x:auto; padding-bottom:6px;}
+  .day{flex:none; width:64px; text-align:center; border:2px solid #e2eeee; border-radius:14px; padding:10px 4px; cursor:pointer; background:#fff;}
+  .day b{display:block; font-size:19px;}
+  .day span{font-size:11.5px; color:var(--soft); text-transform:capitalize;}
+  .day small{display:block; font-size:11px; color:var(--soft); text-transform:capitalize;}
+  .day.sel{border-color:var(--teal); background:var(--teal-light);}
+  .slots{display:grid; grid-template-columns:repeat(3, 1fr); gap:9px;}
+  .slot{border:2px solid #e2eeee; border-radius:12px; padding:11px 4px; text-align:center; cursor:pointer; font-size:15px; background:#fff;}
+  .slot.sel{border-color:var(--teal); background:var(--teal); color:#fff; font-weight:600;}
+  .slot.off{opacity:.38; cursor:not-allowed; text-decoration:line-through; background:#f1f5f5;}
+  label{font-size:13.5px; color:var(--soft); display:block; margin:12px 0 6px;}
+  input, textarea{width:100%; border:2px solid #e2eeee; border-radius:12px; padding:12px; font-size:16px; font-family:inherit; background:#fff;}
+  input:focus, textarea:focus{outline:none; border-color:var(--teal);}
+  .btn{width:100%; border:none; border-radius:14px; padding:16px; font-size:17px; font-weight:700; cursor:pointer; margin-top:18px;}
+  .btn-main{background:var(--teal); color:#fff;}
+  .btn-main:disabled{background:#b9d4d6; cursor:not-allowed;}
+  .btn-wa{background:var(--wa); color:#fff; text-decoration:none; display:block; text-align:center;}
+  .btn-salir{background:none; color:var(--soft); font-size:13.5px; text-decoration:underline; width:100%; margin-top:6px; font-weight:600; border:none; cursor:pointer; padding:10px;}
+  .hint{font-size:13px; color:var(--soft); text-align:center; margin-top:10px; line-height:1.5;}
+  .summary{background:var(--mint); border-radius:14px; padding:14px; font-size:15px; line-height:1.65;}
+  .error{background:#fbe3e0; color:var(--bad); border-radius:12px; padding:12px; font-size:14px; margin-top:12px; display:none; line-height:1.5;}
+  .hidden{display:none;}
+  h3.day-title{font-size:15px; color:var(--teal-dark); margin:20px 0 10px; text-transform:capitalize;}
+  .turno{border:2px solid #e2eeee; border-radius:14px; padding:13px 14px; margin-bottom:10px; background:#fff;}
+  .turno .top{display:flex; justify-content:space-between; align-items:center; gap:8px;}
+  .turno .hora{font-size:19px; font-weight:800; color:var(--teal-dark);}
+  .estado{font-size:11.5px; font-weight:700; border-radius:20px; padding:3px 10px;}
+  .estado.pendiente{background:#fdf0d3; color:#8a6d1a;}
+  .estado.confirmado{background:#d8f3e2; color:var(--ok);}
+  .turno .det{font-size:14.5px; line-height:1.6; margin-top:5px;}
+  .turno .det small{color:var(--soft);}
+  .acciones{display:flex; gap:8px; margin-top:11px; flex-wrap:wrap;}
+  .acciones a, .acciones button{flex:1; text-align:center; text-decoration:none; border-radius:10px; padding:10px 6px; font-size:13.5px; font-weight:700; border:none; cursor:pointer; min-width:100px;}
+  .a-wa{background:var(--wa); color:#fff;}
+  .a-ok{background:var(--teal-light); color:var(--teal-dark);}
+  .a-bad{background:#f7ecea; color:var(--bad);}
+  .vacio{text-align:center; color:var(--soft); padding:26px 10px; font-size:15px; line-height:1.6;}
+  .contadores{display:flex; gap:10px;}
+  .contador{flex:1; background:#fff; border-radius:16px; padding:14px; text-align:center; box-shadow:0 8px 24px rgba(10,93,101,.08);}
+  .contador b{display:block; font-size:26px; color:var(--teal-dark);}
+  .contador span{font-size:12.5px; color:var(--soft);}
+  .hrow{border:2px solid #e2eeee; border-radius:14px; padding:12px; margin-bottom:10px;}
+  .hrow .dname{font-weight:800; color:var(--teal-dark); text-transform:capitalize; display:flex; align-items:center; gap:9px; font-size:15.5px;}
+  .hrow .dname input{width:20px; height:20px; accent-color:var(--teal);}
+  .hgrid{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center; font-size:13px; color:var(--soft);}
+  .hgrid input[type="time"]{width:auto; padding:8px; font-size:15px;}
+  .hgrid select{border:2px solid #e2eeee; border-radius:10px; padding:9px; font-size:15px; background:#fff;}
+
+  .cal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  .cal-head b{font-size:16.5px; color:var(--teal-dark); text-transform:capitalize;}
+  .cal-nav{background:var(--teal-light); color:var(--teal-dark); border:none; border-radius:10px; width:40px; height:36px; font-size:15px; cursor:pointer;}
+  .cal-nav:disabled{opacity:.35; cursor:not-allowed;}
+  .cal-dow{display:grid; grid-template-columns:repeat(7,1fr); text-align:center; font-size:11.5px; color:var(--soft); margin-bottom:6px;}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:5px;}
+  .cal-dia{position:relative; aspect-ratio:1; border:2px solid #eef4f4; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:14.5px; cursor:pointer; background:#fff;}
+  .cal-dia.fuera{border:none; background:transparent; cursor:default;}
+  .cal-dia.hoy{border-color:var(--teal); background:var(--teal-light);}
+  .cal-dia.sel{background:var(--teal); color:#fff; border-color:var(--teal);}
+  .cal-n{position:absolute; top:3px; right:3px; background:var(--teal); color:#fff; font-size:10.5px; font-weight:800; min-width:17px; height:17px; border-radius:9px; display:flex; align-items:center; justify-content:center; padding:0 4px;}
+  .cal-dia.sel .cal-n{background:#fff; color:var(--teal-dark);}
+  .cal-n.pend{background:#e9a13b;}
+  .cal-dia.sel .cal-n.pend{background:#e9a13b; color:#fff;}
+
+  .cal-dia{flex-direction:column; gap:1px;}
+  .cal-q{font-size:9.5px; color:var(--teal); font-weight:700; line-height:1.05; text-align:center;}
+  .cal-dia.sel .cal-q{color:#fff;}
+  .cal-q.lleno{color:var(--bad);}
+  .cal-dia.sel .cal-q.lleno{color:#ffd9d4;}
+  .cal-dia.cerrado{opacity:.55; background:#f4f7f7;}
+  .cal-dia.pasado{opacity:.4; cursor:default;}
+  .hgrid-chips{display:flex; flex-wrap:wrap; gap:7px;}
+  .hchip{font-size:12.5px; font-weight:700; border-radius:9px; padding:6px 9px;}
+  .hchip.libre{background:#e2f4ea; color:var(--ok);}
+  .hchip.ocupada{background:#f7ecea; color:var(--bad);}
+  .hchip.pasada{background:#eef2f2; color:var(--soft);}
+  footer{text-align:center; color:var(--soft); font-size:12.5px; padding:14px 20px 0; line-height:1.7;}
+  footer a{color:var(--soft); text-decoration:none; font-size:12.5px;}
+</style>
+</head>
+<body>
+
+<!-- ================= VISTA DEL PACIENTE ================= -->
+<div id="vista-paciente">
+  <header class="h-paciente">
+    <div class="logo">🦷</div>
+    <h1>Consultorio Dental</h1>
+    <p>Dra. Naibis · Reserva tu turno sin llamar</p>
+  </header>
+
+  <div class="wrap">
+    <div class="card" id="card-servicio">
+      <h2><span class="step-num">1</span> ¿Qué necesitas hacerte?</h2>
+      <div class="grid" id="servicios"></div>
+    </div>
+
+    <div class="card hidden" id="card-dia">
+      <h2><span class="step-num">2</span> Escoge el día</h2>
+      <div class="days" id="dias"></div>
+      <p class="hint" id="cargando-dias">Cargando días disponibles…</p>
+    </div>
+
+    <div class="card hidden" id="card-hora">
+      <h2><span class="step-num">3</span> Escoge la hora</h2>
+      <div class="slots" id="horas"></div>
+      <p class="hint" id="sin-horas" style="display:none">No quedan horas libres este día. Prueba con otro día.</p>
+    </div>
+
+    <div class="card hidden" id="card-datos">
+      <h2><span class="step-num">4</span> Tus datos</h2>
+      <div class="summary" id="resumen-parcial"></div>
+      <label>Tu nombre</label>
+      <input id="nombre" type="text" placeholder="Ej.: María Pérez" autocomplete="name">
+      <label>Tu teléfono (WhatsApp)</label>
+      <input id="telefono" type="tel" placeholder="Ej.: 51234567" autocomplete="tel">
+      <label>¿Algo que la doctora deba saber? (opcional)</label>
+      <textarea id="nota" rows="2" placeholder="Ej.: Me duele una muela desde ayer"></textarea>
+      <button class="btn btn-main" id="btn-confirmar" disabled>Reservar mi turno</button>
+      <div class="error" id="error-reserva"></div>
+      <p class="hint">Al reservar, tu turno queda guardado en la agenda de la doctora y se abrirá WhatsApp con el aviso ya escrito. Solo toca enviar.</p>
+    </div>
+
+    <div class="card hidden" id="card-listo" style="text-align:center">
+      <div style="font-size:52px;">✅</div>
+      <h2 style="justify-content:center; margin-top:6px;">¡Tu turno quedó reservado!</h2>
+      <div class="summary" id="resumen-final" style="text-align:left; margin-top:12px;"></div>
+      <a class="btn btn-wa" id="btn-wa" href="#" target="_blank" rel="noopener">📲 Avisar por WhatsApp</a>
+      <p class="hint">Toca el botón verde y luego "enviar" en WhatsApp. La doctora te confirma por ahí. ¡Gracias!</p>
+    </div>
+  </div>
+</div>
+
+<!-- ================= VISTA DE LA DOCTORA ================= -->
+<div id="vista-panel" class="hidden">
+  <header class="h-panel">
+    <h1>🦷 Panel de turnos</h1>
+    <p>Dra. Naibis · Consultorio Dental</p>
+    <p style="margin-top:8px;"><a href="#" id="link-volver">← Volver a la página de turnos</a></p>
+  </header>
+
+  <div class="wrap-panel" id="zona-login">
+    <div class="card">
+      <p style="font-size:16px; text-align:center;">🔒 Acceso privado de la doctora</p>
+      <label>Tu contraseña</label>
+      <input id="clave" type="password" placeholder="••••••••" autocomplete="current-password">
+      <button class="btn btn-main" id="btn-entrar">Entrar a mi panel</button>
+      <div class="error" id="login-error"></div>
+    </div>
+  </div>
+
+  <div class="wrap-panel hidden" id="zona-panel">
+    <div class="contadores">
+      <div class="contador"><b id="c-hoy">0</b><span>Turnos hoy</span></div>
+      <div class="contador"><b id="c-pend">0</b><span>Por confirmar</span></div>
+      <div class="contador"><b id="c-total">0</b><span>Próximos</span></div>
+    </div>
+        <div class="card" style="padding:16px 14px;">
+      <div class="cal-head">
+        <button class="cal-nav" id="cal-prev">◀</button>
+        <b id="cal-titulo"></b>
+        <button class="cal-nav" id="cal-next">▶</button>
+      </div>
+      <div class="cal-dow"><span>lun</span><span>mar</span><span>mié</span><span>jue</span><span>vie</span><span>sáb</span><span>dom</span></div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <p class="hint" style="margin-top:10px;">Cada día dice cuántos turnos quedan libres. Toca un día para ver su horario completo: qué horas están libres y cuáles ocupadas.</p>
+    </div>
+    <div id="lista"></div>
+
+    <div class="card" style="margin-top:22px">
+      <p style="font-size:16.5px; font-weight:800; color:var(--teal-dark); margin-bottom:6px;">⚙️ Mi horario</p>
+      <p style="font-size:13.5px; color:var(--soft); line-height:1.55; margin-bottom:14px;">Marca los días que atiendes y pon tus horas de la mañana y de la tarde (la tarde puede quedar vacía). La página de turnos se ajusta sola.</p>
+      <div id="horario-form"></div>
+      <div class="hgrid" style="margin-top:4px;">
+        <span>Turnos cada:</span>
+        <select id="h-intervalo">
+          <option value="30">30 min</option>
+          <option value="40">40 min</option>
+          <option value="60">1 hora</option>
+        </select>
+      </div>
+      <button class="btn btn-main" id="btn-horario">Guardar mi horario</button>
+      <p id="horario-ok" style="color:var(--ok); font-size:14px; font-weight:700; text-align:center; margin-top:10px; display:none;">✅ Horario guardado. Ya está activo en tu página de turnos.</p>
+      <div class="error" id="horario-error"></div>
+    </div>
+
+    <div class="card">
+      <p style="font-size:16.5px; font-weight:800; color:var(--teal-dark); margin-bottom:6px;">🔑 Cambiar mi contraseña</p>
+      <label>Contraseña actual</label>
+      <input id="clave-actual" type="password" placeholder="••••••••">
+      <label>Contraseña nueva</label>
+      <input id="clave-nueva" type="password" placeholder="Mínimo 6 caracteres">
+      <button class="btn btn-main" id="btn-clave">Guardar contraseña nueva</button>
+      <p id="clave-ok" style="color:var(--ok); font-size:14px; font-weight:700; text-align:center; margin-top:10px; display:none;">✅ Contraseña cambiada.</p>
+      <div class="error" id="clave-error"></div>
+    </div>
+
+    <button class="btn-salir" id="btn-salir">Cerrar sesión</button>
+  </div>
+</div>
+
+<footer>
+  Consultorio Dental · Dra. Naibis<br>
+  Hecho con 💙 por Soluciones Digitales Caimán<br>
+  <a href="#" id="link-doctora" title="Acceso de la doctora">· Acceso doctora ·</a>
+</footer>
+
+<script>
+// ============================================================
+// CONFIGURACIÓN — Soluciones Digitales Caimán
+// Proyecto Supabase de la Dra. Naibis. La clave es la PÚBLICA
+// (publishable): vive dentro de la página, no es una contraseña.
+// ============================================================
+const SUPABASE_URL = 'https://ypctotdoyozjfbpzpvrd.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_4r1BkNmYtojktR26M3zjmw_JMlHmNdk';
+const WHATSAPP_DENTISTA = '5354061965'; // WhatsApp de la Dra. Naibis: aquí llegan los avisos de reserva.
+// Panel SIN correo: la doctora entra solo con su contraseña, guardada
+// cifrada en Supabase y verificada por las funciones panel_*.
+
+const $ = id => document.getElementById(id);
+const DIAS_N = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const MESES_N = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const DIAS_TXT = {1:'lunes',2:'martes',3:'miércoles',4:'jueves',5:'viernes',6:'sábado',0:'domingo'};
+const HORARIO_DEFAULT = { intervalo: 40, dias: {
+  0:{on:false, m:['09:00','13:00'], t:null},
+  1:{on:true,  m:['09:00','13:00'], t:['14:00','17:00']},
+  2:{on:true,  m:['09:00','13:00'], t:['14:00','17:00']},
+  3:{on:true,  m:['09:00','13:00'], t:['14:00','17:00']},
+  4:{on:true,  m:['09:00','13:00'], t:['14:00','17:00']},
+  5:{on:true,  m:['09:00','13:00'], t:['14:00','17:00']},
+  6:{on:true,  m:['09:00','13:00'], t:null}
+}};
+const HEAD = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' };
+function isoDe(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function aMin(s){ const [h,m] = s.split(':').map(Number); return h*60+m; }
+function aHHMM(min){ return String(Math.floor(min/60)).padStart(2,'0') + ':' + String(min%60).padStart(2,'0'); }
+function fmtFechaTxt(d){ return DIAS_N[d.getDay()] + ' ' + d.getDate() + ' de ' + MESES_N[d.getMonth()]; }
+function fechaTxtDeISO(iso){ const [y,m,dd] = iso.split('-').map(Number); const d = new Date(y, m-1, dd); return DIAS_N[d.getDay()] + ' ' + dd + ' de ' + MESES_N[m-1]; }
+function telWA(tel){ let d = (tel||'').replace(/\D/g,''); if(d.length === 8) d = '53' + d; return d; }
+
+// ===== CAMBIO DE VISTA (paciente <-> doctora) =====
+$('link-doctora').addEventListener('click', e => {
+  e.preventDefault();
+  $('vista-paciente').classList.add('hidden');
+  $('vista-panel').classList.remove('hidden');
+  window.scrollTo(0, 0);
+  if(CLAVE){
+    rpcPanel('panel_abrir', { p_clave: CLAVE })
+      .then(res => {
+        if(res && res.ok === true){ TURNOS = res.turnos || []; entrarPanel(); }
+        else { CLAVE = ''; sessionStorage.removeItem('naibis_clave'); }
+      })
+      .catch(() => {});
+  }
+});
+$('link-volver').addEventListener('click', e => {
+  e.preventDefault();
+  $('vista-panel').classList.add('hidden');
+  $('vista-paciente').classList.remove('hidden');
+  window.scrollTo(0, 0);
+});
+
+/* ================= PARTE DEL PACIENTE ================= */
+const SERVICIOS = [
+  { id:'revision',   nombre:'Consulta y revisión',  dur:'20 min' },
+  { id:'limpieza',   nombre:'Limpieza dental',      dur:'40 min' },
+  { id:'empaste',    nombre:'Empaste',              dur:'45 min' },
+  { id:'extraccion', nombre:'Extracción',           dur:'30 min' },
+  { id:'endodoncia', nombre:'Endodoncia (conducto)',dur:'60 min' },
+  { id:'protesis',   nombre:'Prótesis y coronas',   dur:'30 min' },
+];
+let sel = { servicio:null, fecha:null, fechaTxt:'', hora:null };
+let HORARIO = HORARIO_DEFAULT;
+let OCUPADAS = new Set();
+
+function slotsDelDia(d){
+  const cfg = HORARIO.dias[d.getDay()];
+  if(!cfg || !cfg.on) return [];
+  const out = [];
+  [cfg.m, cfg.t].filter(Boolean).forEach(b => { for(let t = aMin(b[0]); t < aMin(b[1]); t += HORARIO.intervalo) out.push(aHHMM(t)); });
+  return out;
+}
+async function cargarDatos(){
+  const hoy = new Date();
+  const desde = isoDe(hoy);
+  const hasta = isoDe(new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()+28));
+  try {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/config_naibis?id=eq.1&select=horario', { headers: HEAD });
+    if(r.ok){ const rows = await r.json(); if(rows[0] && rows[0].horario) HORARIO = rows[0].horario; }
+  } catch(e){}
+  try {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/horas_ocupadas_naibis', {
+      method:'POST', headers: HEAD, body: JSON.stringify({ p_desde: desde, p_hasta: hasta })
+    });
+    if(r.ok){ const rows = await r.json(); rows.forEach(x => OCUPADAS.add(x.fecha + '|' + x.hora)); }
+  } catch(e){}
+  $('cargando-dias').style.display = 'none';
+  pintarDias();
+}
+SERVICIOS.forEach(s => {
+  const d = document.createElement('div');
+  d.className = 'opt'; d.innerHTML = s.nombre + '<small>Duración aprox.: ' + s.dur + '</small>';
+  d.onclick = () => {
+    sel.servicio = s;
+    document.querySelectorAll('#servicios .opt').forEach(e => e.classList.remove('sel'));
+    d.classList.add('sel');
+    $('card-dia').classList.remove('hidden');
+    $('card-dia').scrollIntoView({behavior:'smooth', block:'center'});
+  };
+  $('servicios').appendChild(d);
+});
+function pintarDias(){
+  const cont = $('dias'); cont.innerHTML = '';
+  const hoy = new Date(); let mostrados = 0;
+  for(let i=0; i<28 && mostrados<14; i++){
+    const d = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()+i);
+    const cfg = HORARIO.dias[d.getDay()];
+    if(!cfg || !cfg.on) continue;
+    mostrados++;
+    const iso = isoDe(d);
+    const el = document.createElement('div');
+    el.className = 'day';
+    el.innerHTML = '<span>' + DIAS_N[d.getDay()].slice(0,3) + '</span><b>' + d.getDate() + '</b><small>' + MESES_N[d.getMonth()].slice(0,3) + '</small>';
+    el.onclick = () => {
+      sel.fecha = iso; sel.fechaTxt = fmtFechaTxt(d); sel.hora = null;
+      document.querySelectorAll('#dias .day').forEach(e => e.classList.remove('sel'));
+      el.classList.add('sel');
+      pintarHoras(d, iso);
+      $('card-hora').classList.remove('hidden');
+      $('card-datos').classList.add('hidden');
+      $('card-hora').scrollIntoView({behavior:'smooth', block:'center'});
+    };
+    cont.appendChild(el);
+  }
+}
+function pintarHoras(d, iso){
+  const cont = $('horas'); cont.innerHTML = '';
+  const ahora = new Date(); let libres = 0;
+  slotsDelDia(d).forEach(h => {
+    const [hh, mm] = h.split(':').map(Number);
+    const slotDate = new Date(d.getFullYear(), d.getMonth(), d.getDate(), hh, mm);
+    const ocupada = slotDate <= ahora || OCUPADAS.has(iso + '|' + h);
+    const el = document.createElement('div');
+    el.className = 'slot' + (ocupada ? ' off' : '');
+    el.textContent = h;
+    if(!ocupada){
+      libres++;
+      el.onclick = () => {
+        sel.hora = h;
+        document.querySelectorAll('#horas .slot').forEach(e => e.classList.remove('sel'));
+        el.classList.add('sel');
+        $('resumen-parcial').innerHTML = '🦷 <b>' + sel.servicio.nombre + '</b><br>📅 ' + sel.fechaTxt + '<br>🕐 ' + sel.hora;
+        $('card-datos').classList.remove('hidden');
+        $('card-datos').scrollIntoView({behavior:'smooth', block:'center'});
+      };
+    }
+    cont.appendChild(el);
+  });
+  $('sin-horas').style.display = libres === 0 ? 'block' : 'none';
+}
+function validar(){ $('btn-confirmar').disabled = !($('nombre').value.trim() && $('telefono').value.trim().length >= 6 && sel.servicio && sel.fecha && sel.hora); }
+['nombre','telefono'].forEach(id => $(id).addEventListener('input', validar));
+$('btn-confirmar').onclick = async () => {
+  const nombre = $('nombre').value.trim(), telefono = $('telefono').value.trim(), nota = $('nota').value.trim();
+  const btn = $('btn-confirmar');
+  btn.disabled = true; btn.textContent = 'Guardando tu turno…';
+  $('error-reserva').style.display = 'none';
+  const turno = { servicio: sel.servicio.nombre, fecha: sel.fecha, hora: sel.hora, nombre, telefono, nota, estado: 'pendiente' };
+  try {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/turnos_naibis', {
+      method:'POST', headers: Object.assign({}, HEAD, { 'Prefer': 'return=minimal' }), body: JSON.stringify(turno)
+    });
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+  } catch(e){
+    btn.disabled = false; btn.textContent = 'Reservar mi turno';
+    const er = $('error-reserva');
+    er.textContent = 'No se pudo guardar el turno. Revisa tu conexión a internet e inténtalo de nuevo.';
+    er.style.display = 'block';
+    return;
+  }
+  OCUPADAS.add(sel.fecha + '|' + sel.hora);
+  const fechaTxt = sel.fechaTxt, hora = sel.hora, servicio = sel.servicio.nombre;
+  $('resumen-final').innerHTML = '🦷 <b>' + servicio + '</b><br>📅 ' + fechaTxt + '<br>🕐 ' + hora + '<br>👤 ' + nombre + (nota ? '<br>📝 ' + nota : '');
+  const msg = 'Hola Dra. Naibis, soy ' + nombre + '. Reservé un turno desde su página: ' + servicio + ', el ' + fechaTxt + ' a las ' + hora + '. Mi teléfono: ' + telefono + '.' + (nota ? ' Nota: ' + nota : '');
+  $('btn-wa').href = 'https://wa.me/' + WHATSAPP_DENTISTA + '?text=' + encodeURIComponent(msg);
+  $('card-datos').classList.add('hidden');
+  $('card-listo').classList.remove('hidden');
+  $('card-listo').scrollIntoView({behavior:'smooth', block:'center'});
+};
+cargarDatos();
+
+/* ================= PARTE DE LA DOCTORA ================= */
+let CLAVE = sessionStorage.getItem('naibis_clave') || '';
+let TURNOS = [];
+async function rpcPanel(nombre, body){
+  const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + nombre, {
+    method:'POST', headers: HEAD, body: JSON.stringify(body)
+  });
+  if(!r.ok) throw new Error('rpc ' + nombre);
+  return r.json();
+}
+
+$('btn-entrar').onclick = async () => {
+  const clave = $('clave').value;
+  const er = $('login-error'); er.style.display = 'none';
+  $('btn-entrar').textContent = 'Entrando…'; $('btn-entrar').disabled = true;
+  try {
+    const res = await rpcPanel('panel_abrir', { p_clave: clave });
+    if(!res || res.ok !== true) throw new Error('clave');
+    CLAVE = clave;
+    sessionStorage.setItem('naibis_clave', CLAVE);
+    TURNOS = res.turnos || [];
+    entrarPanel();
+  } catch(e){
+    er.textContent = 'Contraseña incorrecta. Revisa y vuelve a intentarlo.';
+    er.style.display = 'block';
+  }
+  $('btn-entrar').textContent = 'Entrar a mi panel'; $('btn-entrar').disabled = false;
+};
+$('clave').addEventListener('keydown', e => { if(e.key === 'Enter') $('btn-entrar').click(); });
+
+function entrarPanel(){
+  $('zona-login').classList.add('hidden');
+  $('zona-panel').classList.remove('hidden');
+  pintarPanel();
+  cargarHorarioPanel();
+}
+$('btn-salir').onclick = () => {
+  CLAVE = ''; sessionStorage.removeItem('naibis_clave'); TURNOS = [];
+  $('zona-panel').classList.add('hidden');
+  $('zona-login').classList.remove('hidden');
+};
+
+async function cargarTurnos(){
+  try {
+    const res = await rpcPanel('panel_abrir', { p_clave: CLAVE });
+    if(res && res.ok === true){ TURNOS = res.turnos || []; }
+    else { $('btn-salir').click(); return; }
+  } catch(e){}
+  pintarPanel();
+}
+let mesVista = null;
+let diaSel = null;
+
+function pintarPanel(){
+  const hoy = isoDe(new Date());
+  const proximos = TURNOS.filter(t => t.estado !== 'cancelado');
+  $('c-hoy').textContent = proximos.filter(t => t.fecha === hoy).length;
+  $('c-pend').textContent = proximos.filter(t => t.estado === 'pendiente').length;
+  $('c-total').textContent = proximos.length;
+  if(!diaSel) diaSel = hoy;
+  if(!mesVista){ const a = new Date(); mesVista = { y: a.getFullYear(), m: a.getMonth() }; }
+  pintarCalendario(proximos, hoy);
+  pintarDia(proximos, hoy);
+}
+function pintarCalendario(proximos, hoy){
+  const y = mesVista.y, m = mesVista.m;
+  $('cal-titulo').textContent = MESES_N[m] + ' ' + y;
+  const porDia = {};
+  proximos.forEach(t => { (porDia[t.fecha] = porDia[t.fecha] || []).push(t); });
+  const grid = $('cal-grid'); grid.innerHTML = '';
+  const inicio = (new Date(y, m, 1).getDay() + 6) % 7;
+  const diasMes = new Date(y, m + 1, 0).getDate();
+  for(let i = 0; i < inicio; i++){
+    const s = document.createElement('div');
+    s.className = 'cal-dia fuera';
+    grid.appendChild(s);
+  }
+  const ahora = new Date();
+  for(let d = 1; d <= diasMes; d++){
+    const fecha = new Date(y, m, d);
+    const iso = isoDe(fecha);
+    const ts = porDia[iso] || [];
+    const cfg = HORARIO.dias[fecha.getDay()];
+    const abierto = cfg && cfg.on;
+    const el = document.createElement('div');
+    let cls = 'cal-dia' + (iso === hoy ? ' hoy' : '') + (iso === diaSel ? ' sel' : '');
+    let inner = '<b>' + d + '</b>';
+    if(iso < hoy){
+      cls += ' pasado';
+      el.className = cls;
+      el.innerHTML = inner;
+      grid.appendChild(el);
+      continue;
+    }
+    if(!abierto){
+      cls += ' cerrado';
+      inner += '<small class="cal-q">cerrado</small>';
+    } else {
+      let quedan = 0;
+      slotsDelDia(fecha).forEach(h => {
+        const partes = h.split(':').map(Number);
+        const sd = new Date(y, m, d, partes[0], partes[1]);
+        if(sd > ahora && !ts.some(t => t.hora === h)) quedan++;
+      });
+      if(quedan === 0) inner += '<small class="cal-q lleno">completo</small>';
+      else inner += '<small class="cal-q">quedan ' + quedan + '</small>';
+    }
+    el.className = cls;
+    el.innerHTML = inner;
+    el.onclick = () => { diaSel = iso; pintarPanel(); };
+    grid.appendChild(el);
+  }
+  const a = new Date();
+  $('cal-prev').disabled = (y === a.getFullYear() && m === a.getMonth());
+}
+function pintarDia(proximos, hoy){
+  const cont = $('lista'); cont.innerHTML = '';
+  const partes = diaSel.split('-').map(Number);
+  const fecha = new Date(partes[0], partes[1] - 1, partes[2]);
+  const h = document.createElement('h3');
+  h.className = 'day-title';
+  h.textContent = '📅 ' + fechaTxtDeISO(diaSel) + (diaSel === hoy ? ' (hoy)' : '');
+  cont.appendChild(h);
+  const delDia = proximos.filter(t => t.fecha === diaSel).sort((x, y2) => x.hora < y2.hora ? -1 : 1);
+  const cfg = HORARIO.dias[fecha.getDay()];
+  const card = document.createElement('div');
+  card.className = 'card';
+  if(!cfg || !cfg.on){
+    card.innerHTML = '<p style="font-size:15px; font-weight:700; color:var(--teal-dark); margin-bottom:4px;">🕐 Horario del día</p><p style="font-size:14px; color:var(--soft);">Este día está cerrado en tu horario.</p>';
+  } else {
+    const ahora = new Date();
+    const ocup = {};
+    delDia.forEach(t => { ocup[t.hora] = t; });
+    let libres = 0;
+    let chips = '';
+    slotsDelDia(fecha).forEach(hora => {
+      const hp = hora.split(':').map(Number);
+      const sd = new Date(partes[0], partes[1] - 1, partes[2], hp[0], hp[1]);
+      if(ocup[hora]) chips += '<span class="hchip ocupada">' + hora + ' · ocupado</span>';
+      else if(sd <= ahora) chips += '<span class="hchip pasada">' + hora + ' · ya pasó</span>';
+      else { libres++; chips += '<span class="hchip libre">' + hora + ' · libre</span>'; }
+    });
+    card.innerHTML = '<p style="font-size:15px; font-weight:700; color:var(--teal-dark); margin-bottom:10px;">🕐 Horario del día — quedan ' + libres + ' libre' + (libres === 1 ? '' : 's') + '</p><div class="hgrid-chips">' + chips + '</div>';
+  }
+  cont.appendChild(card);
+  if(delDia.length === 0){
+    const v = document.createElement('div');
+    v.className = 'card vacio';
+    v.textContent = 'No hay turnos reservados este día.';
+    cont.appendChild(v);
+    return;
+  }
+  const h2 = document.createElement('h3');
+  h2.className = 'day-title';
+  h2.textContent = 'Turnos reservados (' + delDia.length + ')';
+  cont.appendChild(h2);
+  delDia.forEach(t => cont.appendChild(tarjetaTurno(t)));
+}
+function tarjetaTurno(t){
+  const ft = fechaTxtDeISO(t.fecha);
+  const msg = 'Hola ' + t.nombre + ', soy la Dra. Naibis. Te confirmo tu turno: ' + t.servicio + ', el ' + ft + ' a las ' + t.hora + '. ¡Te espero! 🦷';
+  const el = document.createElement('div');
+  el.className = 'turno';
+  el.innerHTML =
+    '<div class="top"><span class="hora">🕐 ' + t.hora + '</span>' +
+    '<span class="estado ' + t.estado + '">' + t.estado.toUpperCase() + '</span></div>' +
+    '<div class="det">🦷 <b>' + t.servicio + '</b><br>👤 ' + t.nombre +
+    '<br><small>📞 ' + t.telefono + (t.nota ? '<br>📝 ' + t.nota : '') + '</small></div>' +
+    '<div class="acciones">' +
+      '<a class="a-wa" target="_blank" rel="noopener" href="https://wa.me/' + telWA(t.telefono) + '?text=' + encodeURIComponent(msg) + '">WhatsApp al paciente</a>' +
+      (t.estado === 'pendiente' ? '<button class="a-ok" data-acc="confirmar">✓ Confirmar</button>' : '') +
+      '<button class="a-bad" data-acc="cancelar">Cancelar</button>' +
+    '</div>';
+  el.querySelectorAll('button[data-acc]').forEach(b => {
+    b.onclick = async () => {
+      const nuevo = b.dataset.acc === 'confirmar' ? 'confirmado' : 'cancelado';
+      try {
+        const ok = await rpcPanel('panel_estado', { p_clave: CLAVE, p_id: t.id, p_estado: nuevo });
+        if(ok !== true) throw new Error('estado');
+        t.estado = nuevo;
+        pintarPanel();
+      } catch(e){ alert('No se pudo guardar el cambio. Revisa tu conexión.'); }
+    };
+  });
+  return el;
+}
+$('cal-prev').onclick = () => { mesVista.m--; if(mesVista.m < 0){ mesVista.m = 11; mesVista.y--; } pintarPanel(); };
+$('cal-next').onclick = () => { mesVista.m++; if(mesVista.m > 11){ mesVista.m = 0; mesVista.y++; } pintarPanel(); };
+
+async function cargarHorarioPanel(){
+  let h = HORARIO_DEFAULT;
+  try {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/config_naibis?id=eq.1&select=horario', { headers: HEAD });
+    if(r.ok){ const rows = await r.json(); if(rows[0] && rows[0].horario) h = rows[0].horario; }
+  } catch(e){}
+  $('h-intervalo').value = String(h.intervalo || 40);
+  const cont = $('horario-form'); cont.innerHTML = '';
+  [1,2,3,4,5,6,0].forEach(dn => {
+    const cfg = (h.dias && h.dias[dn]) || {on:false, m:['09:00','13:00'], t:null};
+    const row = document.createElement('div');
+    row.className = 'hrow';
+    row.innerHTML =
+      '<label class="dname"><input type="checkbox" id="h-on-' + dn + '"' + (cfg.on ? ' checked' : '') + '> ' + DIAS_TXT[dn] + '</label>' +
+      '<div class="hgrid"><span>Mañana:</span>' +
+      '<input type="time" id="h-m1-' + dn + '" value="' + cfg.m[0] + '"><span>a</span>' +
+      '<input type="time" id="h-m2-' + dn + '" value="' + cfg.m[1] + '"></div>' +
+      '<div class="hgrid"><span>Tarde:</span>' +
+      '<input type="time" id="h-t1-' + dn + '" value="' + (cfg.t ? cfg.t[0] : '') + '"><span>a</span>' +
+      '<input type="time" id="h-t2-' + dn + '" value="' + (cfg.t ? cfg.t[1] : '') + '"></div>';
+    cont.appendChild(row);
+  });
+  HORARIO = h;
+  pintarPanel();
+}
+$('btn-horario').onclick = async () => {
+  const h = { intervalo: parseInt($('h-intervalo').value, 10) || 40, dias: {} };
+  [0,1,2,3,4,5,6].forEach(dn => {
+    const t1 = $('h-t1-' + dn).value, t2 = $('h-t2-' + dn).value;
+    h.dias[dn] = { on: $('h-on-' + dn).checked, m: [$('h-m1-' + dn).value || '09:00', $('h-m2-' + dn).value || '13:00'], t: (t1 && t2) ? [t1, t2] : null };
+  });
+  const er = $('horario-error'); er.style.display = 'none';
+  try {
+    const ok = await rpcPanel('panel_horario', { p_clave: CLAVE, p_horario: h });
+    if(ok !== true) throw new Error('horario');
+    HORARIO = h;
+    $('horario-ok').style.display = 'block';
+    setTimeout(() => { $('horario-ok').style.display = 'none'; }, 4000);
+  } catch(e){
+    er.textContent = 'No se pudo guardar el horario. Revisa tu conexión e inténtalo de nuevo.';
+    er.style.display = 'block';
+  }
+};
+
+$('btn-clave').onclick = async () => {
+  const actual = $('clave-actual').value, nueva = $('clave-nueva').value;
+  const er = $('clave-error'); er.style.display = 'none';
+  if(nueva.length < 6){
+    er.textContent = 'La contraseña nueva debe tener al menos 6 caracteres.';
+    er.style.display = 'block';
+    return;
+  }
+  try {
+    const ok = await rpcPanel('panel_clave', { p_actual: actual, p_nueva: nueva });
+    if(ok !== true) throw new Error('clave');
+    CLAVE = nueva;
+    sessionStorage.setItem('naibis_clave', CLAVE);
+    $('clave-actual').value = ''; $('clave-nueva').value = '';
+    $('clave-ok').style.display = 'block';
+    setTimeout(() => { $('clave-ok').style.display = 'none'; }, 4000);
+  } catch(e){
+    er.textContent = 'No se pudo cambiar. Revisa tu contraseña actual.';
+    er.style.display = 'block';
+  }
+};
+</script>
+</body>
+</html>
